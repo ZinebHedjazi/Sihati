@@ -1,0 +1,843 @@
+<?php 
+    session_start();
+    require_once 'config.php';
+   
+    if(isset($_GET['id'])){
+        $getid = intval($_GET['id']);
+        $user = $bdd->prepare('SELECT id, nom, prenom, date, lieu, fils_de, et_de, profession, situation_familiale, sexe, adresse, n_securite_sociale, affiliation, groupe_sanguin, diagnostic, email, photo, password FROM utilisateur WHERE id = ?');
+        $user->execute(array($getid));
+        $userinfo = $user->fetch();
+    //     header('Location:index.php');
+
+    if(isset($_FILES['image']) AND !empty($_FILES['image']['name'])){
+     $tailleMax = 2097152;
+     $extensionsValides = array('jpg', 'jpeg', 'gif', 'png');
+       if($_FILES['image']['size'] <= $tailleMax){
+          $enxtensionUpload = strtolower(substr(strrchr($_FILES['image']['name'], '.'), 1));
+          if(in_array($enxtensionUpload, $extensionsValides)){
+               $chemin = "images/".$_SESSION['user_id'].".".$enxtensionUpload;
+               $resulat= move_uploaded_file($_FILES['image']['tmp_name'], $chemin);
+               if($resulat){
+                    $updatephoto = $bdd->prepare('UPDATE utilisateur SET photo = :image WHERE id = :id');
+                    $updatephoto->execute(array(
+                         'image' => $_SESSION['user_id'].".".$enxtensionUpload,
+                         'id' => $_SESSION['user_id'],
+                         
+                    ));
+               }else{
+                    $msg= "erreur durant l'importation de la photo";   
+               }
+              
+          }else{
+             $msg= "Votre photo de profil doit etre au format jpg, jpeg, gif, png";    
+          }
+       }else{
+          $msg= "Votre photo de profil ne doit pas dépasser la taille 2m";   
+            
+       }
+
+    }
+
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+     <title>Sihati - Profil </title>
+<!--
+
+Template 2098 Health
+
+http://www.tooplate.com/view/2098-health
+
+-->
+     <meta charset="UTF-8">
+     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+     <meta name="description" content="">
+     <meta name="keywords" content="">
+     <meta name="author" content="Tooplate">
+     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+     <meta name="viewport" content="width=device-width, initial-scale=1">
+     
+     
+     
+
+     <link rel="stylesheet" href="css/bootstrap.min.css">
+     <link rel="stylesheet" href="css/font-awesome.min.css">
+     <link rel="stylesheet" href="css/animate.css">
+     <link rel="stylesheet" href="css/owl.carousel.css">
+     <link rel="stylesheet" href="css/owl.theme.default.min.css">
+
+     <!-- MAIN CSS -->
+     <link rel="stylesheet" href="css/tooplate-style.css">
+     
+
+</head>
+<body id="top" data-spy="scroll" data-target=".navbar-collapse" data-offset="50">
+
+     <!-- PRE LOADER -->
+     <section class="preloader">
+          <div class="spinner">
+
+               <span class="spinner-rotate"></span>
+               
+          </div>
+     </section>
+
+
+     <!-- HEADER -->
+     
+     <!-- MENU -->
+     <!-- HEADER -->
+     <header>
+          <div class="container">
+               <div class="row">
+
+                    <div class="col-md-4 col-sm-5">
+                         <p>Bienvenue dans une plateforme professionnelle de santé</p>
+                    </div>
+                         
+                    <div class="col-md-8 col-sm-7 text-align-right">
+                         <span class="phone-icon"><i class="fa fa-phone"></i> </span>
+                         <span class="date-icon"><i class="fa fa-calendar-plus-o"></i> 8:00 AM - 5:00 PM (Samedi-Jeudi)</span>
+                         <span class="email-icon"><i class="fa fa-envelope-o"></i> <a href="#">sihati.societé@gmail.com</a></span>
+                    </div>
+
+               </div>
+          </div>
+     </header>
+
+     
+
+
+     <!-- MENU -->
+     <section class="navbar navbar-default navbar-static-top" role="navigation">
+          <div class="container">
+
+               <div class="navbar-header">
+                    <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                         <span class="icon icon-bar"></span>
+                         <span class="icon icon-bar"></span>
+                         <span class="icon icon-bar"></span>
+                    </button>
+
+                    <!-- lOGO TEXT HERE -->
+                   
+                         <div class="logo">
+                              <a href="index.html" class="navbar-brand"> Sihati </a>
+                              <img src="images/logo.png" class="img-responsive" alt="">
+                              
+
+                             
+                         
+                         </div>
+                   
+               </div>
+               
+
+               <!-- MENU LINKS -->
+               <div class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav navbar-right">
+                    <li><a href="accueil.php" class="smoothScroll">Accueil</a></li>
+                         <li><a href="#about" class="smoothScroll">À propos de nous</a></li>
+                         <li><a href="#news" class="smoothScroll">News</a></li>
+                         <li><a href="#google-map" class="smoothScroll">Contact</a></li>
+                         <li class="appointment-btn"><a href="deconnexion.php">Déconnexion</a></li>
+                         
+                    </ul>
+               </div>
+
+          </div>
+     </section>
+
+
+     <section id="appointment" data-stellar-background-ratio="3">
+     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+<div class="container bootstrap snippets bootdey">
+<div class="row">
+  <div class="profile-nav col-md-3">
+      <div class="panel">
+          <div class="user-heading round">
+              <a href="#">
+              <img src="images/<?php echo $userinfo['photo']; ?>" alt="">
+              </a>
+              <h1><?php echo $userinfo['nom']; ?> <?php echo $userinfo['prenom']; ?></h1>
+              <p><?php echo $userinfo['email']; ?></p>
+          </div>
+        <form enctype="multipart/form-data" action="" method="post">
+                
+            <ul class="nav nav-pills nav-stacked">
+               <li class="active"><a href="#"> <i class="fa fa-user"></i> Profile</a></li>
+               <li><input type="file" name="image"></li>
+               <li><button type="submit" id="im" class="btn btn-primary btn-lg btn-block"><i class="fa fa-camera"></i>  Ajouter une photo</button></li>
+             
+            </ul>
+        </form>
+      </div>
+  </div>
+  
+  <div class="profile-info col-md-9">
+      
+      <div class="panel">
+          <div class="bio-graph-heading">
+          La santé est le support de notre vie, l'oublier c'est ôter l'essence à notre survie.
+          </div>
+          <div class="panel-body bio-graph-info">
+              <h1>Informations personnelles</h1>
+              <div class="row">
+                  <div class="bio-row">
+                      <p><span>Nom </span>: <?php echo $userinfo['nom']; ?></p>
+                  </div>
+                  <div class="bio-row">
+                      <p><span>Prénom </span>: <?php echo $userinfo['prenom']; ?></p>
+                  </div>
+                  <div class="bio-row">
+                      <p><span>Date de naissance </span>: <?php echo $userinfo['date']; ?></p>
+                  </div>
+                  <div class="bio-row">
+                      <p><span>Lieu de naissance</span>: <?php echo $userinfo['lieu']; ?></p>
+                  </div>
+                  <div class="bio-row">
+                      <p><span>Fils(e) de </span>: <?php echo $userinfo['fils_de']; ?></p>
+                  </div>
+                  <div class="bio-row">
+                      <p><span>Et de  </span>: <?php echo $userinfo['et_de']; ?></p>
+                  </div>
+                  <div class="bio-row">
+                      <p><span>Profession </span>: <?php echo $userinfo['profession']; ?></p>
+                  </div>
+                  <div class="bio-row">
+                      <p><span>Situation familiale </span>: <?php echo $userinfo['situation_familiale']; ?></p>
+                  </div>
+                  <div class="bio-row">
+                      <p><span>Sexe </span>: <?php echo $userinfo['sexe']; ?></p>
+                  </div>
+                  <div class="bio-row">
+                      <p><span>Adresse de résidence </span>: <?php echo $userinfo['adresse']; ?></p>
+                  </div>
+              </div>
+          </div>
+      </div>
+      <div>
+          <div class="row">
+              <div class="col-md-6">
+                  <div class="panel">
+                      <div class="panel-body">
+                          
+                          <div class="bio-desk">
+                              <h4 class="red">Assurance</h4>
+                              <p>N° sécurité sociale : <?php echo $userinfo['n_securite_sociale']; ?></p>
+                              <p>Affiliation : <?php echo $userinfo['affiliation']; ?></p>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              <div class="col-md-6">
+                  <div class="panel">
+                      <div class="panel-body">
+                          
+                          <div class="bio-desk">
+                              <h4 class="terques">Information médicales </h4>
+                              <p>Groupe sanguin : <?php echo $userinfo['groupe_sanguin']; ?></p>
+                              <p>Diagnostic : <?php echo $userinfo['diagnostic']; ?></p>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              
+          </div>
+      </div>
+  </div>
+</div>
+</div>
+     </section>  
+     <footer data-stellar-background-ratio="5">
+          <div class="container">
+               <div class="row">
+
+                    <div class="col-md-4 col-sm-4">
+                         <div class="footer-thumb"> 
+                              <h4 class="wow fadeInUp" data-wow-delay="0.4s">Informations de contact</h4>
+                              <p></p>
+
+                              <div class="contact-info">
+                                   <p><i class="fa fa-phone"></i> 031457812</p>
+                                   <p><i class="fa fa-envelope-o"></i> <a href="#">sihati.societé@gmail.com</a></p>
+                              </div>
+                         </div>
+                    </div>
+
+                    <div class="col-md-4 col-sm-4"> 
+                         <div class="footer-thumb"> 
+                              <h4 class="wow fadeInUp" data-wow-delay="0.4s">Dernières nouvelles</h4>
+                              <div class="latest-stories">
+                                   <div class="stories-image">
+                                        <a href="#"><img src="images/news-image.jpg" class="img-responsive" alt=""></a>
+                                   </div>
+                                   <div class="stories-info">
+                                        <a href="#"><h5>Technologie innovante</h5></a>
+                                        <span>Mai 01, 2020</span>
+                                   </div>
+                              </div>
+
+                              <div class="latest-stories">
+                                   <div class="stories-image">
+                                        <a href="#"><img src="images/news-image.jpg" class="img-responsive" alt=""></a>
+                                   </div>
+                                   <div class="stories-info">
+                                        <a href="#"><h5>Nouveau processus de santé</h5></a>
+                                        <span>20 Février 2020</span>
+                                   </div>
+                              </div>
+                         </div>
+                    </div>
+
+                    <div class="col-md-4 col-sm-4"> 
+                         <div class="footer-thumb">
+                              <div class="opening-hours">
+                                   <h4 class="wow fadeInUp" data-wow-delay="0.4s">Horaires d'ouvertures</h4>
+                                   <p>Dimanche - Jeudi <span>08:00 AM - 5:00 PM</span></p>
+                                   <p>Samedi<span>09:00 AM - 08:00 PM</span></p>
+                                   <p>Vendredi <span>Fermée</span></p>
+                              </div> 
+
+                              <ul class="social-icon">
+                                   <li><a href="#" class="fa fa-facebook-square" attr="facebook icon"></a></li>
+                                   <li><a href="#" class="fa fa-twitter"></a></li>
+                                   <li><a href="#" class="fa fa-instagram"></a></li>
+                              </ul>
+                         </div>
+                    </div>
+
+                    <div class="col-md-12 col-sm-12 border-top">
+                         <div class="col-md-4 col-sm-6">
+                              <div class="copyright-text"> 
+                                   <p>Copyright &copy; 2020 votre societé 
+                                   
+                                   | Design: ZinebH</p>
+                              </div>
+                         </div>
+                         <div class="col-md-6 col-sm-6">
+                              <div class="footer-link"> 
+                                   <a href="#">Tests de laboratoire</a>
+                                   <a href="#">Départements</a>
+                                   <a href="#">Police d'assurance</a>
+                                   <a href="#">Carrières</a>
+                              </div>
+                         </div>
+                         <div class="col-md-2 col-sm-2 text-align-center">
+                              <div class="angle-up-btn"> 
+                                  <a href="#top" class="smoothScroll wow fadeInUp" data-wow-delay="1.2s"><i class="fa fa-angle-up"></i></a>
+                              </div>
+                         </div>   
+                    </div>
+                    
+               </div>
+          </div>
+     </footer> 
+     <style>
+       
+     .logo img,
+       .logo .author-info {
+        display: inline-block;
+         vertical-align: top;
+     }
+  .author-info h5 {
+    margin-bottom: 0;
+  }
+  .logo img {
+    border-radius: 100%;
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+  }
+  .img-responsive{
+     width: 100px;
+    height: 100px;
+  }
+  #formulaire{
+     background-color: #d3eaf1;
+     border-radius: 8px;
+        box-shadow: 0 2px 4px rgb(0 0 0 / 10%), 0 8px 16px rgb(0 0 0 / 10%);
+  }
+   #appointment{
+    
+     background-color :#f0f2f5
+  }
+  #compte{
+     color: #fff;
+    background-color: #c76291;
+    border-color: #c76291;
+    
+    
+}
+#notif{
+     color: #6b99de;
+}
+#succés{
+     background-color: #d3eaf1;
+}
+.alert-success {
+    color: #337ab7;
+    border-color  : #a8ccea
+    }
+   
+       #recherche{
+          background: #edf3d6;
+        }
+
+       #identification{
+        border : 1px #ddd solid;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgb(0 0 0 / 10%), 0 8px 16px rgb(0 0 0 / 10%);
+        background: white;
+       }
+       #identification2{
+        border : 1px #ddd solid;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgb(0 0 0 / 10%), 0 8px 16px rgb(0 0 0 / 10%);
+        background: white;
+       }
+       #photo{
+        border : 0.1px #eee solid;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgb(0 0 0 / 10%), 0 8px 16px rgb(0 0 0 / 10%);
+
+       }
+       #appointment{
+    
+          background: #f0f2f5;
+       }
+       #partie1{
+        border : 0.5px #ddd solid;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgb(0 0 0 / 10%), 0 8px 16px rgb(0 0 0 / 10%);
+       }
+       #cf-submit{
+        border-radius: 8px;
+        width : 300px;
+        height : 15px;
+        
+       }
+       .btn-primary:hover{
+        color: #fff;
+        background-color: #22b5c4;
+        border-color: #204d74;
+
+       }
+      
+
+
+
+
+
+
+
+       body {
+    color: #797979;
+    background: #f1f2f7;
+    font-family: 'Open Sans', sans-serif;
+    padding: 0px !important;
+    margin: 0px !important;
+    font-size: 13px;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-font-smoothing: antialiased;
+}
+
+.profile-nav, .profile-info{
+    margin-top:30px;   
+}
+
+.profile-nav .user-heading {
+    background: #f9d1e4;
+    color: #fff;
+    border-radius: 4px 4px 0 0;
+    -webkit-border-radius: 4px 4px 0 0;
+    padding: 30px;
+    text-align: center;
+}
+
+.profile-nav .user-heading.round a  {
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    border: 10px solid rgba(255,255,255,0.3);
+    display: inline-block;
+}
+
+.profile-nav .user-heading a img {
+    width: 112px;
+    height: 112px;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+}
+
+.profile-nav .user-heading h1 {
+    font-size: 22px;
+    font-weight: 300;
+    margin-bottom: 5px;
+}
+
+.profile-nav .user-heading p {
+    font-size: 12px;
+}
+
+.profile-nav ul {
+    margin-top: 1px;
+}
+
+.profile-nav ul > li {
+    border-bottom: 1px solid #ebeae6;
+    margin-top: 0;
+    line-height: 30px;
+}
+
+.profile-nav ul > li:last-child {
+    border-bottom: none;
+}
+
+.profile-nav ul > li > a {
+    border-radius: 0;
+    -webkit-border-radius: 0;
+    color: #89817f;
+    border-left: 5px solid #fff;
+}
+
+.profile-nav ul > li > a:hover, .profile-nav ul > li > a:focus, .profile-nav ul li.active  a {
+    background: #f8f7f5 !important;
+    border-left: 5px solid #f8f7f5;
+    color: #89817f !important;
+}
+
+.profile-nav ul > li:last-child > a:last-child {
+    border-radius: 0 0 4px 4px;
+    -webkit-border-radius: 0 0 4px 4px;
+}
+
+.profile-nav ul > li > a > i{
+    font-size: 16px;
+    padding-right: 10px;
+    color: #bcb3aa;
+}
+
+.r-activity {
+    margin: 6px 0 0;
+    font-size: 12px;
+}
+
+
+.p-text-area, .p-text-area:focus {
+    border: none;
+    font-weight: 300;
+    box-shadow: none;
+    color: #c3c3c3;
+    font-size: 16px;
+}
+
+.profile-info .panel-footer {
+    background-color:#f8f7f5 ;
+    border-top: 1px solid #e7ebee;
+}
+
+.profile-info .panel-footer ul li a {
+    color: #7a7a7a;
+}
+#im{
+    color: #fff;
+    background-color: #22b5c4;
+    border-color: #22b5c4;
+    
+}
+
+.bio-graph-heading {
+    background:  #f9d1e4;
+    color: #fff;
+    text-align: center;
+    font-style: italic;
+    padding: 40px 110px;
+    border-radius: 4px 4px 0 0;
+    -webkit-border-radius: 4px 4px 0 0;
+    font-size: 16px;
+    font-weight: 300;
+}
+
+.bio-graph-info {
+    color: #89817e;
+}
+
+.bio-graph-info h1 {
+    font-size: 22px;
+    font-weight: 300;
+    margin: 0 0 20px;
+}
+
+.bio-row {
+    width: 50%;
+    float: left;
+    margin-bottom: 10px;
+    padding:0 15px;
+}
+
+.bio-row p span {
+    width: 200px;
+    display: inline-block;
+}
+
+.bio-chart, .bio-desk {
+    float: left;
+}
+
+.bio-chart {
+    width: 40%;
+}
+
+.bio-desk {
+    width: 60%;
+}
+
+.bio-desk h4 {
+    font-size: 15px;
+    font-weight:400;
+}
+
+.bio-desk h4.terques {
+    color: #4CC5CD;
+}
+
+.bio-desk h4.red {
+    color: #e26b7f;
+}
+
+.bio-desk h4.green {
+    color: #97be4b;
+}
+
+.bio-desk h4.purple {
+    color: #caa3da;
+}
+
+.file-pos {
+    margin: 6px 0 10px 0;
+}
+
+.profile-activity h5 {
+    font-weight: 300;
+    margin-top: 0;
+    color: #c3c3c3;
+}
+
+.summary-head {
+    background: #ee7272;
+    color: #fff;
+    text-align: center;
+    border-bottom: 1px solid #ee7272;
+}
+
+.summary-head h4 {
+    font-weight: 300;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+}
+
+.summary-head p {
+    color: rgba(255,255,255,0.6);
+}
+
+ul.summary-list {
+    display: inline-block;
+    padding-left:0 ;
+    width: 100%;
+    margin-bottom: 0;
+}
+
+ul.summary-list > li {
+    display: inline-block;
+    width: 19.5%;
+    text-align: center;
+}
+
+ul.summary-list > li > a > i {
+    display:block;
+    font-size: 18px;
+    padding-bottom: 5px;
+}
+
+ul.summary-list > li > a {
+    padding: 10px 0;
+    display: inline-block;
+    color: #818181;
+}
+
+ul.summary-list > li  {
+    border-right: 1px solid #eaeaea;
+}
+
+ul.summary-list > li:last-child  {
+    border-right: none;
+}
+
+.activity {
+    width: 100%;
+    float: left;
+    margin-bottom: 10px;
+}
+
+.activity.alt {
+    width: 100%;
+    float: right;
+    margin-bottom: 10px;
+}
+
+.activity span {
+    float: left;
+}
+
+.activity.alt span {
+    float: right;
+}
+.activity span, .activity.alt span {
+    width: 45px;
+    height: 45px;
+    line-height: 45px;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    background: #eee;
+    text-align: center;
+    color: #fff;
+    font-size: 16px;
+}
+
+.activity.terques span {
+    background: #8dd7d6;
+}
+
+.activity.terques h4 {
+    color: #8dd7d6;
+}
+.activity.purple span {
+    background: #b984dc;
+}
+
+.activity.purple h4 {
+    color: #b984dc;
+}
+.activity.blue span {
+    background: #90b4e6;
+}
+
+.activity.blue h4 {
+    color: #90b4e6;
+}
+.activity.green span {
+    background: #aec785;
+}
+
+.activity.green h4 {
+    color: #aec785;
+}
+
+.activity h4 {
+    margin-top:0 ;
+    font-size: 16px;
+}
+
+.activity p {
+    margin-bottom: 0;
+    font-size: 13px;
+}
+
+.activity .activity-desk i, .activity.alt .activity-desk i {
+    float: left;
+    font-size: 18px;
+    margin-right: 10px;
+    color: #bebebe;
+}
+
+.activity .activity-desk {
+    margin-left: 70px;
+    position: relative;
+}
+
+.activity.alt .activity-desk {
+    margin-right: 70px;
+    position: relative;
+}
+
+.activity.alt .activity-desk .panel {
+    float: right;
+    position: relative;
+}
+
+.activity-desk .panel {
+    background: #F4F4F4 ;
+    display: inline-block;
+}
+
+
+.activity .activity-desk .arrow {
+    border-right: 8px solid #F4F4F4 !important;
+}
+.activity .activity-desk .arrow {
+    border-bottom: 8px solid transparent;
+    border-top: 8px solid transparent;
+    display: block;
+    height: 0;
+    left: -7px;
+    position: absolute;
+    top: 13px;
+    width: 0;
+}
+
+.activity-desk .arrow-alt {
+    border-left: 8px solid #F4F4F4 !important;
+}
+
+.activity-desk .arrow-alt {
+    border-bottom: 8px solid transparent;
+    border-top: 8px solid transparent;
+    display: block;
+    height: 0;
+    right: -7px;
+    position: absolute;
+    top: 13px;
+    width: 0;
+}
+
+.activity-desk .album {
+    display: inline-block;
+    margin-top: 10px;
+}
+
+.activity-desk .album a{
+    margin-right: 10px;
+}
+
+.activity-desk .album a:last-child{
+    margin-right: 0px;
+}
+     </style>
+
+
+     
+     
+
+
+     
+
+     <!-- SCRIPTS -->
+     
+     <script src="js/jquery.js"></script>
+     <script src="js/bootstrap.min.js"></script>
+     <script src="js/jquery.sticky.js"></script>
+     <script src="js/jquery.stellar.min.js"></script>
+     <script src="js/wow.min.js"></script>
+     <script src="js/smoothscroll.js"></script>
+     <script src="js/owl.carousel.min.js"></script>
+     <script src="js/custom.js"></script>
+
+</body>
+</html>
+<?php 
+    }
+?>
